@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Trainer - Gerador de Treino</title>
+    <style>
+        /* Fontes e Estilo Global */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 600px; /* Tamanho menor do container */
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            position: relative; /* Para permitir o uso de imagem no topo */
+            text-align: center;
+        }
+        .header-image {
+            width: 100%; /* Para cobrir toda a largura do container */
+            height: 150px;
+            background: url('https://img.freepik.com/fotos-premium/academia-moderna-e-totalmente-equipada-localizada-no-andar-superior-de-uma-torre-comercial-generative-ai_1000174-4421.jpg') no-repeat center/cover; /* URL da imagem de treino muscular */
+            opacity: 1.0; /* Opacidade suave */
+            border-radius: 10px 10px 0 0; /* Bordas arredondadas apenas no topo */
+            margin-bottom: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 28px; /* Tamanho reduzido */
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px; /* Menor espaçamento */
+        }
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #34495e;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: 1px solid #bdc3c7;
+            margin-bottom: 8px;
+            box-sizing: border-box; /* Ajuste de box-sizing */
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1abc9c;
+        }
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 6px;
+        }
+        button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            color: #34495e;
+            line-height: 1.6;
+        }
+        .output strong {
+            color: #e74c3c;
+        }
+        /* Estilo Responsivo */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 95%;
+                padding: 15px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            .header-image {
+                height: 100px; /* Menor altura em dispositivos móveis */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-image"></div>
+        <h1>Gerador de Treino - Personal Trainer</h1>
+
+        <div class="form-group">
+            <label for="age">Idade</label>
+            <input type="number" id="age" placeholder="Digite sua idade" />
+        </div>
+
+        <div class="form-group">
+            <label for="biotype">Biotipo</label>
+            <select id="biotype">
+                <option value="Ectomorfo">Ectomorfo</option>
+                <option value="Mesomorfo">Mesomorfo</option>
+                <option value="Endomorfo">Endomorfo</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="periodization">Periodização (dias por semana)</label>
+            <select id="periodization">
+                <option value="1">1 dia</option>
+                <option value="3">3 dias</option>
+                <option value="5">5 dias</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="mode">Modo de Treino</label>
+            <select id="mode" onchange="updateWorkoutTypes()">
+                <option value="Gym">Gym</option>
+                <option value="Calistenia">Calistenia</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="type">Tipo de Treino (selecione mais de um, se necessário)</label>
+            <div id="type-container">
+                <!-- Opções serão atualizadas dinamicamente aqui -->
+            </div>
+        </div>
+
+        <button id="generateBtn">Gerar Treino</button>
+
+        <div class="output" id="output">
+            <!-- O plano de treino será exibido aqui -->
+        </div>
+    </div>
+
+    <script>
+        const gymOptions = [
+            { id: 'funcional', label: 'Funcional', value: 'Funcional' },
+            { id: 'maquinario', label: 'Maquinário', value: 'Maquinário' },
+            { id: 'pesoLivre', label: 'Peso Livre', value: 'Peso Livre' },
+            { id: 'cardio', label: 'Cardio', value: 'Cardio' },
+            { id: 'hiit', label: 'HIIT', value: 'HIIT' }
+        ];
+
+        const calisteniaOptions = [
+            { id: 'pranchaAbdominal', label: 'Prancha Abdominal', value: 'Prancha Abdominal' },
+            { id: 'pranchaLateral', label: 'Prancha Lateral', value: 'Prancha Lateral' },
+            { id: 'agachamento', label: 'Agachamento', value: 'Agachamento' },
+            { id: 'barraFixa', label: 'Barra Fixa', value: 'Barra Fixa' },
+            { id: 'afundo', label: 'Afundo', value: 'Afundo' },
+            { id: 'flexao', label: 'Flexão de Braços', value: 'Flexão de Braços' },
+            { id: 'burpee', label: 'Burpee', value: 'Burpee' }
+        ];
+
+        function updateWorkoutTypes() {
+            const mode = document.getElementById('mode').value;
+            const typeContainer = document.getElementById('type-container');
+            typeContainer.innerHTML = ''; // Limpa as opções atuais
+
+            let options = mode === 'Gym' ? gymOptions : calisteniaOptions;
+
+            options.forEach(option => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = option.id;
+                checkbox.value = option.value;
+
+                const label = document.createElement('label');
+                label.htmlFor = option.id;
+                label.innerText = option.label;
+
+                const div = document.createElement('div');
+                div.appendChild(checkbox);
+                div.appendChild(label);
+
+                typeContainer.appendChild(div);
+            });
+        }
+
+        // Função para coletar os tipos de treino selecionados
+        function getSelectedWorkoutTypes() {
+            const types = [];
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            checkboxes.forEach((checkbox) => {
+                types.push(checkbox.value);
+            });
+            return types;
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const variables = {};
+            // Capturando os valores inseridos pelo usuário e armazenando-os no objeto variables
+            variables.age = document.getElementById('age').value;
+            variables.biotype = document.getElementById('biotype').value;
+            variables.periodization = document.getElementById('periodization').value;
+            variables.mode = document.getElementById('mode').value;
+            variables.types = getSelectedWorkoutTypes();
+
+            // Definindo a intensidade do treino com base na idade
+            let intensity = '';
+            if (variables.age >= 12 && variables.age <= 40) intensity = 'Intenso';
+            else if (variables.age >= 41 && variables.age <= 55) intensity = 'Moderado';
+            else if (variables.age >= 56 && variables.age <= 90) intensity = 'Leve';
+
+            // Definindo a periodização
+            let training = '';
+            if (variables.periodization == '1') training = 'Treino Full Body';
+            else if (variables.periodization == '3') training = 'Treino ABC';
+            else if (variables.periodization == '5') training = 'Treino ABCDE';
+
+            // Gerando o texto de saída com as informações coletadas
+            let outputText = `<strong>Plano de Treino:</strong><br>`;
+            outputText += `Idade: ${variables.age} anos - Intensidade: ${intensity}<br>`;
+            outputText += `Biotipo: ${variables.biotype}<br>`;
+            outputText += `Modo de Treino: ${variables.mode}<br>`;
+            outputText += `Tipos de Treino: ${variables.types.join(', ')}<br>`;
+            outputText += `Periodização: ${training}`;
+
+            document.getElementById('output').innerHTML = outputText;
+        });
+    </script>
+
+</body>
+</html>
